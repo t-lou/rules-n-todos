@@ -1,0 +1,49 @@
+{
+ "week": {
+  "1": [
+   "vocation"
+  ],
+  "even": [
+   "office"
+  ],
+  "odd": [
+   "home"
+  ]
+ },
+ "week-day": {
+  "1": [
+   "standup"
+  ],
+  "even": [
+   "document"
+  ],
+  "5": [
+   "planning"
+  ],
+  "odd": [
+   "coordination"
+  ]
+ },
+ "month": {
+  "odd": [
+   "coffee"
+  ],
+  "even": [
+   "tee"
+  ],
+  "12": [
+   "christmas-party"
+  ]
+ },
+ "month-day": {
+  "odd": [
+   "coffee"
+  ],
+  "even": [
+   "tee"
+  ],
+  "1": [
+   "start"
+  ]
+ }
+}
