@@ -1,6 +1,7 @@
 import os
 import json
 import datetime
+import re
 
 kFilenameRule = 'rules.json'
 kFilenameTodo = 'todos.json'
@@ -46,13 +47,13 @@ if __name__ == '__main__':
     assert find({'1': {'2': 3}}, ['1', '1']) is None
 
 
-def display(items: list):
-    for i, it in enumerate(items, 1):
-        print(f'{i} -\t' + it.replace('\n', '\n\t'))
+def display(items: list) -> str:
+    return '\n'.join(f'{i} -\t' + it.replace('\n', '\n\t')
+                     for i, it in enumerate(items, 1)) + '\n'
 
 
-def show(target_time: datetime.datetime):
-    print('On day ' + target_time.strftime('%Y-%m-%d'))
+def show(target_time: datetime.datetime) -> str:
+    text = 'On day ' + target_time.strftime('%Y-%m-%d') + '\n\n'
     # summarize this day
     time_text = {
         'year': str(target_time.year),
@@ -72,8 +73,9 @@ def show(target_time: datetime.datetime):
         for t in rules:
             for v in rules[t]:
                 if v == time_text[t]:
-                    print(f'Rule on {t} {v}')
-                    display(rules[t][v])
+                    text += f'Rule on {t} {v}\n' + display(rules[t][v]) + '\n'
+                if v == time_even_odd[t]:
+                    text += f'Rule on {t} {v}\n' + display(rules[t][v]) + '\n'
 
     # if file for todos is available, fine matches and print
     if os.path.isfile(kFilenameTodo):
@@ -83,5 +85,89 @@ def show(target_time: datetime.datetime):
         assert todo is None or type(todo) in (
             tuple, list), f'saved todo {todo} is not a list'
         if todo is not None:
-            print('Todo for today is')
-            display(todo)
+            text += 'Todo for today is\n' + display(todo) + '\n'
+    return text
+
+
+def is_date_format_correct(text: str) -> bool:
+    pattern = r'[0-9]{4}-[0-9]{2}-[0-9]{2}'
+    return bool(re.findall(pattern, text))
+
+
+if __name__ == '__main__':
+    assert not is_date_format_correct('')
+    assert not is_date_format_correct('abcd')
+    assert not is_date_format_correct('1234')
+    assert not is_date_format_correct('12345678')
+    assert not is_date_format_correct('1234/56/78')
+    assert not is_date_format_correct('12.34.5678')
+    assert is_date_format_correct('1234-56-78')
+
+
+def remove_old_todo():
+    if os.path.isfile(kFilenameTodo):
+        todos = json.loads(open(kFilenameTodo).read())
+        now = datetime.datetime.now()
+        year, month, day = now.year, now.month, now.day
+        for y in tuple(todos.keys()):
+            y_i = int(y)
+            if y_i < year:
+                todos.pop(y)
+            elif y_i == year:
+                for m in tuple(todos[y].keys()):
+                    m_i = int(m)
+                    if m_i < month:
+                        todos[y].pop(m)
+                    elif m_i == month:
+                        for d in tuple(todos[y][m].keys()):
+                            d_i = int(d)
+                            if d_i < day:
+                                todos[y][m].pop(d)
+                        if not bool(todos[y][m]):
+                            todos[y].pop(m)
+                if not bool(todos[y]):
+                    todos.pop(y)
+        open(kFilenameTodo, 'w').write(json.dumps(todos, indent=' '))
+
+
+def list_rules() -> tuple:
+    rules = []
+    if os.path.isfile(kFilenameRule):
+        saved_rules = json.loads(open(kFilenameRule).read())
+        for interval in saved_rules:
+            for occurrence in saved_rules[interval]:
+                for rule in saved_rules[interval][occurrence]:
+                    rules.append((interval, occurrence, rule))
+    return rules
+
+
+def init_dict(data: dict, keys: tuple, init_value):
+    if bool(keys):
+        if keys[0] not in data:
+            data[keys[0]] = {} if len(keys) > 1 else init_value
+        init_dict(data[keys[0]], keys[1:], init_value)
+
+
+def add_rules(rules: list):
+    defined_rules = json.loads(
+        open(kFilenameRule).read()) if os.path.isfile(kFilenameRule) else {}
+    for rule in rules:
+        init_dict(defined_rules, rule[:2], [])
+        defined_rules[rule[0]][rule[1]].append(rule[2])
+    open(kFilenameRule, 'w').write(json.dumps(defined_rules, indent=' '))
+
+
+def remove_rules(rules: list):
+    defined_rules = json.loads(
+        open(kFilenameRule).read()) if os.path.isfile(kFilenameRule) else {}
+    assert all(rule[0] in defined_rules \
+                and rule[1] in defined_rules[rule[0]] \
+                and rule[2] in defined_rules[rule[0]][rule[1]] \
+            for rule in rules), \
+        'at least one rule is not found'
+    for rule in rules:
+        defined_rules[rule[0]][rule[1]] = [
+            content for content in defined_rules[rule[0]][rule[1]]
+            if content != rule[2]
+        ]
+    open(kFilenameRule, 'w').write(json.dumps(defined_rules, indent=' '))
