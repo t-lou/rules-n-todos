@@ -105,28 +105,21 @@ if __name__ == '__main__':
 
 
 def remove_old_todo():
+    def clean_lower_entry(data: dict, bounds: list):
+        if bool(bounds):
+            for key in tuple(data.keys()):
+                num = int(key)
+                if num < bounds[0]:
+                    data.pop(key)
+                elif num == bounds[0]:
+                    clean_lower_entry(data[key], bounds[1:])
+                    if not bool(data[key]):
+                        data.pop(key)
+
     if os.path.isfile(kFilenameTodo):
         todos = json.loads(open(kFilenameTodo).read())
         now = datetime.datetime.now()
-        year, month, day = now.year, now.month, now.day
-        for y in tuple(todos.keys()):
-            y_i = int(y)
-            if y_i < year:
-                todos.pop(y)
-            elif y_i == year:
-                for m in tuple(todos[y].keys()):
-                    m_i = int(m)
-                    if m_i < month:
-                        todos[y].pop(m)
-                    elif m_i == month:
-                        for d in tuple(todos[y][m].keys()):
-                            d_i = int(d)
-                            if d_i < day:
-                                todos[y][m].pop(d)
-                        if not bool(todos[y][m]):
-                            todos[y].pop(m)
-                if not bool(todos[y]):
-                    todos.pop(y)
+        clean_lower_entry(todos, (now.year, now.month, now.day))
         open(kFilenameTodo, 'w').write(json.dumps(todos, indent=' '))
 
 
