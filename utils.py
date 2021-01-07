@@ -52,40 +52,86 @@ def display(items: list) -> str:
                      for i, it in enumerate(items, 1)) + '\n'
 
 
-def show(target_time: datetime.datetime) -> str:
-    text = 'On day ' + target_time.strftime('%Y-%m-%d') + '\n\n'
+def summarize_rules(time_attributes: dict) -> str:
+    text = ''
+
     # summarize this day
-    time_text = {
-        'year': str(target_time.year),
-        'month': str(target_time.month),
-        'month-day': str(target_time.day),
-        'week': str(target_time.isocalendar()[1]),
-        'week-day': str(target_time.isocalendar()[2]),
-    }
+    time_text = {t: str(time_attributes[t]) for t in time_attributes}
     time_even_odd = {
-        t: 'odd' if int(time_text[t]) % 2 == 1 else 'even'
-        for t in time_text
+        t: 'odd' if time_attributes[t] % 2 == 1 else 'even'
+        for t in time_attributes
     }
 
     # if file for rules is available, fine matches and print
     if os.path.isfile(kFilenameRule):
         rules = json.loads(open(kFilenameRule).read())
-        for t in rules:
+        for t in tuple(t for t in rules if t in time_attributes):
             for v in rules[t]:
                 if v == time_text[t]:
                     text += f'Rule on {t} {v}\n' + display(rules[t][v]) + '\n'
                 if v == time_even_odd[t]:
                     text += f'Rule on {t} {v}\n' + display(rules[t][v]) + '\n'
 
+    return text
+
+
+def summarize_day(target_time: datetime.datetime) -> str:
+    text = 'On day ' + target_time.strftime(
+        '%Y-%m-%d') + f' CW{target_time.isocalendar()[1]} \n\n'
+    # summarize this day
+    time_attributes = {
+        'year': target_time.year,
+        'month': target_time.month,
+        'month-day': target_time.day,
+        'week': target_time.isocalendar()[1],
+        'week-day': target_time.isocalendar()[2],
+    }
+    text += summarize_rules(time_attributes)
+
     # if file for todos is available, fine matches and print
     if os.path.isfile(kFilenameTodo):
         todos = json.loads(open(kFilenameTodo).read())
         todo = find(
-            todos, tuple(time_text[k] for k in ('year', 'month', 'month-day')))
+            todos,
+            tuple(
+                str(time_attributes[k])
+                for k in ('year', 'month', 'month-day')))
         assert todo is None or type(todo) in (
             tuple, list), f'saved todo {todo} is not a list'
         if todo is not None:
-            text += 'Todo for today is\n' + display(todo) + '\n'
+            text += 'Todo is\n' + display(todo) + '\n'
+    return text
+
+
+def summarize_week(target_time: datetime.datetime) -> str:
+    text = f'On CW{target_time.isocalendar()[1]} \n\n'
+    # summarize this day
+    time_attributes = {
+        'year': target_time.year,
+        'month': target_time.month,
+        'week': target_time.isocalendar()[1],
+    }
+    text += summarize_rules(time_attributes)
+
+    # if file for todos is available, fine matches and print
+    if os.path.isfile(kFilenameTodo):
+        todos = json.loads(open(kFilenameTodo).read())
+        todo = find(todos,
+                    tuple(str(time_attributes[k]) for k in ('year', 'month')))
+        assert todo is None or type(
+            todo) == dict, f'saved todo {todo} is not dict for a month'
+        if todo is not None:
+            todo_all = []
+            isocalendar = target_time.isocalendar()
+            days = tuple(
+                str(
+                    datetime.datetime.fromisocalendar(isocalendar[0],
+                                                      isocalendar[1], d).day)
+                for d in range(1, 8))
+            for t in days:
+                if t in todo and todo[t] not in todo_all:
+                    todo_all += todo[t]
+            text += 'Todo is\n' + display(todo_all) + '\n'
     return text
 
 

@@ -13,30 +13,50 @@ kHeightButton = 5
 kWidthButton = 80
 # Whether Saturday is a working day.
 kIsSaturdayWorkday = False
+# Delatime of one day.
+kOneDay = datetime.timedelta(days=1)
 
 
 def update_text_this_day():
     text_this_day.config(state='normal')
     text_this_day.delete('1.0', tkinter.END)
-    text_this_day.insert(tkinter.END, utils.show(datetime.datetime.now()))
+    text_this_day.insert(tkinter.END,
+                         utils.summarize_day(datetime.datetime.now()))
     text_this_day.config(state='disabled')
 
 
 def update_next_next_day():
-    time = datetime.datetime.now() + datetime.timedelta(days=1)
+    time = datetime.datetime.now() + kOneDay
     while time.isocalendar()[2] > (6 if kIsSaturdayWorkday else 5):
-        time += datetime.timedelta(days=1)
+        time += kOneDay
     text_next_day.config(state='normal')
     text_next_day.delete('1.0', tkinter.END)
-    text_next_day.insert(tkinter.END, utils.show(time))
+    text_next_day.insert(tkinter.END, utils.summarize_day(time))
     text_next_day.config(state='disabled')
+
+
+def update_text_this_week():
+    text_this_week.config(state='normal')
+    text_this_week.delete('1.0', tkinter.END)
+    text_this_week.insert(tkinter.END,
+                          utils.summarize_week(datetime.datetime.now()))
+    text_this_week.config(state='disabled')
+
+
+def update_next_next_week():
+    text_next_week.config(state='normal')
+    text_next_week.delete('1.0', tkinter.END)
+    text_next_week.insert(
+        tkinter.END,
+        utils.summarize_week(datetime.datetime.now() +
+                             datetime.timedelta(days=7)))
+    text_next_week.config(state='disabled')
 
 
 def init_todo_addtion():
     text_todo_date.delete('1.0', tkinter.END)
     text_todo_content.delete('1.0', tkinter.END)
     text_todo_date.insert(tkinter.END, str(datetime.datetime.now())[:10])
-    text_todo_content.insert(tkinter.END, 'write todo here')
 
 
 def add_todo():
@@ -57,6 +77,8 @@ def add_todo():
         init_todo_addtion()
         update_text_this_day()
         update_next_next_day()
+        update_text_this_week()
+        update_next_next_week()
 
 
 def display_rules():
@@ -155,6 +177,8 @@ base_window.title('rules-n-todos')
 tab_container = tkinter.ttk.Notebook(base_window)
 frame_this_day = tkinter.Frame(tab_container)
 frame_next_day = tkinter.Frame(tab_container)
+frame_this_week = tkinter.Frame(tab_container)
+frame_next_week = tkinter.Frame(tab_container)
 frame_handle_rule = tkinter.Frame(tab_container)
 frame_handle_todo = tkinter.Frame(tab_container)
 
@@ -187,6 +211,36 @@ tkinter.Button(frame_next_day,
                height=kHeightButton,
                width=kWidthButton,
                command=update_next_next_day).pack()
+
+# for tab this week
+text_this_week = tkinter.Text(frame_this_week,
+                              width=kWidthButton,
+                              height=kHeightButton * 5,
+                              state=tkinter.DISABLED)
+text_this_week.bind('<1>', lambda event: text_this_week.focus_set())
+update_text_this_week()
+text_this_week.pack()
+
+tkinter.Button(frame_this_week,
+               text='refresh',
+               height=kHeightButton,
+               width=kWidthButton,
+               command=update_text_this_week).pack()
+
+# for tab next week
+text_next_week = tkinter.Text(frame_next_week,
+                              width=kWidthButton,
+                              height=kHeightButton * 5,
+                              state=tkinter.DISABLED)
+text_next_week.bind('<1>', lambda event: text_next_week.focus_set())
+update_next_next_week()
+text_next_week.pack()
+
+tkinter.Button(frame_next_week,
+               text='refresh',
+               height=kHeightButton,
+               width=kWidthButton,
+               command=update_next_next_week).pack()
 
 # for tab handle rule
 text_rules = tkinter.Text(frame_handle_rule,
@@ -229,6 +283,8 @@ init_todo_addtion()
 
 tab_container.add(frame_this_day, text='this day')
 tab_container.add(frame_next_day, text='next day')
+tab_container.add(frame_this_week, text='this week')
+tab_container.add(frame_next_week, text='next week')
 tab_container.add(frame_handle_rule, text='handle rule')
 tab_container.add(frame_handle_todo, text='handle todo')
 
