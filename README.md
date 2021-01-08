@@ -1,6 +1,8 @@
 # to remind you of the regular rules and irregular todos
 
-***todo*** make the code and document better, in a rush to make it working
+## Run
+
+`python3 rules-n-todos.py` or Wdouble click rules-n-todos.py on Windows.
 
 ## Files
 
@@ -9,10 +11,24 @@
 
 Each of them is skipped if not created
 
-## Programs
+## Functions
 
-- show_today.py shows the rules and todos for today
-- show_next_day.py shows the rules and todos for the next working day (Saturday not included, you you need it, change the 5 to 6 in code)
-- add_todo.py add one todo in file, it can create the file
+- show the todos and rules for today, the next workday, this week and next week
+- add and remove rules, each line is one rule, for example *week-day,1,team round*
+- add one todo for one day or remove the outdated todos
 
-They shall be executed in bash or Windows file browser directly without parameter.
+- reminders for the next workday
+
+![image](https://github.com/t-lou/rules-n-todos/blob/master/screenshots/show-next-day.png)
+
+- reminders for the next week
+
+![image](https://github.com/t-lou/rules-n-todos/blob/master/screenshots/show-next-week.png)
+
+- dialogue for adding and removing rules
+
+![image](https://github.com/t-lou/rules-n-todos/blob/master/screenshots/rules-handling.png)
+
+- window for adding todo and removing old todos
+
+![image](https://github.com/t-lou/rules-n-todos/blob/master/screenshots/todos-handling.png)
