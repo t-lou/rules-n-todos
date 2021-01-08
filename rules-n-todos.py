@@ -52,6 +52,12 @@ def update_next_next_week():
                              datetime.timedelta(days=7)))
     text_next_week.config(state='disabled')
 
+def update_reminders():
+    update_text_this_day()
+    update_next_next_day()
+    update_text_this_week()
+    update_next_next_week()
+
 
 def init_todo_addtion():
     text_todo_date.delete('1.0', tkinter.END)
@@ -75,10 +81,7 @@ def add_todo():
         open(utils.kFilenameTodo, 'w').write(json.dumps(todos, indent=' '))
 
         init_todo_addtion()
-        update_text_this_day()
-        update_next_next_day()
-        update_text_this_week()
-        update_next_next_week()
+        update_reminders()
 
 
 def display_rules():
@@ -110,8 +113,7 @@ def add_rule():
         utils.add_rules(rules)
         text_new_rules.delete('1.0', tkinter.END)
         display_rules()
-        update_text_this_day()
-        update_next_next_day()
+        update_reminders()
 
     window_add = tkinter.Tk()
     window_add.title('add rules')
@@ -143,8 +145,7 @@ def remove_rule():
         utils.remove_rules(rules)
         text_new_rules.delete('1.0', tkinter.END)
         display_rules()
-        update_text_this_day()
-        update_next_next_day()
+        update_reminders()
 
     window_remove_rule = tkinter.Tk()
     window_remove_rule.title('remove rules')
