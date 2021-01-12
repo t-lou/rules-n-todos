@@ -47,7 +47,7 @@ if __name__ == '__main__':
     assert find({'1': {'2': 3}}, ['1', '1']) is None
 
 
-def display(items: list) -> str:
+def format_list(items: list) -> str:
     return '\n'.join(f'{i} -\t' + it.replace('\n', '\n\t')
                      for i, it in enumerate(items, 1)) + '\n'
 
@@ -68,9 +68,11 @@ def summarize_rules(time_attributes: dict) -> str:
         for t in tuple(t for t in rules if t in time_attributes):
             for v in rules[t]:
                 if v == time_text[t]:
-                    text += f'Rule on {t} {v}\n' + display(rules[t][v]) + '\n'
+                    text += f'Rule on {t} {v}\n' + format_list(
+                        rules[t][v]) + '\n'
                 if v == time_even_odd[t]:
-                    text += f'Rule on {t} {v}\n' + display(rules[t][v]) + '\n'
+                    text += f'Rule on {t} {v}\n' + format_list(
+                        rules[t][v]) + '\n'
 
     return text
 
@@ -99,7 +101,7 @@ def summarize_day(target_time: datetime.datetime) -> str:
         assert todo is None or type(todo) in (
             tuple, list), f'saved todo {todo} is not a list'
         if todo is not None:
-            text += 'Todo is\n' + display(todo) + '\n'
+            text += 'Todo is\n' + format_list(todo) + '\n'
     return text
 
 
@@ -131,7 +133,7 @@ def summarize_week(target_time: datetime.datetime) -> str:
             for t in days:
                 if t in todo and todo[t] not in todo_all:
                     todo_all += todo[t]
-            text += 'Todo is\n' + display(todo_all) + '\n'
+            text += 'Todo is\n' + format_list(todo_all) + '\n'
     return text
 
 
@@ -151,22 +153,31 @@ if __name__ == '__main__':
 
 
 def remove_old_todo():
-    def clean_lower_entry(data: dict, bounds: list):
+    def clean_lower_entry(data: dict, bounds: list, removed=list):
         if bool(bounds):
             for key in tuple(data.keys()):
                 num = int(key)
                 if num < bounds[0]:
+                    if len(bounds) == 1:
+                        removed += data[key]
+                    [
+                        clean_lower_entry(elem, bounds[1:], removed)
+                        for elem in data.values()
+                    ]
                     data.pop(key)
                 elif num == bounds[0]:
-                    clean_lower_entry(data[key], bounds[1:])
+                    clean_lower_entry(data[key], bounds[1:], removed)
                     if not bool(data[key]):
                         data.pop(key)
 
+    removed = []
     if os.path.isfile(kFilenameTodo):
         todos = json.loads(open(kFilenameTodo).read())
         now = datetime.datetime.now()
-        clean_lower_entry(todos, (now.year, now.month, now.day))
+        clean_lower_entry(todos, (now.year, now.month, now.day), removed)
         open(kFilenameTodo, 'w').write(json.dumps(todos, indent=' '))
+
+    return removed
 
 
 def list_rules() -> tuple:

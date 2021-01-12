@@ -52,6 +52,7 @@ def update_next_next_week():
                              datetime.timedelta(days=7)))
     text_next_week.config(state='disabled')
 
+
 def update_reminders():
     update_text_this_day()
     update_next_next_day()
@@ -82,6 +83,14 @@ def add_todo():
 
         init_todo_addtion()
         update_reminders()
+
+
+def remove_old_todo():
+    removed = utils.remove_old_todo()
+    if bool(removed):
+        text_todo_content.delete('1.0', tkinter.END)
+        text_todo_content.insert(
+            tkinter.END, 'removed todos\n' + utils.format_list(removed))
 
 
 def display_rules():
@@ -279,7 +288,7 @@ tkinter.Button(frame_handle_todo,
                text='remove old',
                height=kHeightButton,
                width=kWidthButton,
-               command=utils.remove_old_todo).pack()
+               command=remove_old_todo).pack()
 init_todo_addtion()
 
 tab_container.add(frame_this_day, text='this day')

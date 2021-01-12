@@ -2,7 +2,7 @@
 
 ## Run
 
-`python3 rules-n-todos.py` or Wdouble click rules-n-todos.py on Windows.
+`python3 rules-n-todos.py` or double click rules-n-todos.py on Windows.
 
 ## Files
 
