@@ -1,7 +1,6 @@
 import os
 import json
 import datetime
-import re
 
 kFilenameRule = 'rules.json'
 kFilenameTodo = 'todos.json'
@@ -138,8 +137,11 @@ def summarize_week(target_time: datetime.datetime) -> str:
 
 
 def is_date_format_correct(text: str) -> bool:
-    pattern = r'[0-9]{4}-[0-9]{2}-[0-9]{2}'
-    return bool(re.findall(pattern, text))
+    try:
+        datetime.datetime.strptime('%Y-%m-%d', text)
+    except:
+        return False
+    return True
 
 
 if __name__ == '__main__':
@@ -149,7 +151,8 @@ if __name__ == '__main__':
     assert not is_date_format_correct('12345678')
     assert not is_date_format_correct('1234/56/78')
     assert not is_date_format_correct('12.34.5678')
-    assert is_date_format_correct('1234-56-78')
+    assert not is_date_format_correct('1234-56-78')
+    assert not is_date_format_correct('1992-01-15')
 
 
 def remove_old_todo():
