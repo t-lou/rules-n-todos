@@ -15,6 +15,16 @@ kWidthButton = 80
 kIsSaturdayWorkday = False
 # Delatime of one day.
 kOneDay = datetime.timedelta(days=1)
+kParamButtonPack = {
+    'expand': tkinter.YES,
+    'fill': tkinter.X,
+    'side': tkinter.TOP
+}
+kParamTextPack = {
+    'expand': tkinter.YES,
+    'fill': tkinter.BOTH,
+    'side': tkinter.TOP
+}
 
 
 def update_text_this_day():
@@ -139,13 +149,13 @@ def add_rule():
     text_new_rules = tkinter.Text(window_add,
                                   width=kWidthButton,
                                   height=kHeightButton * 3)
-    text_new_rules.pack()
+    text_new_rules.pack(**kParamTextPack)
 
     tkinter.Button(window_add,
                    text='add',
                    height=kHeightButton,
                    width=kWidthButton,
-                   command=add_rule_impl).pack()
+                   command=add_rule_impl).pack(**kParamButtonPack)
 
 
 def remove_rule():
@@ -172,13 +182,13 @@ def remove_rule():
     text_new_rules = tkinter.Text(window_remove_rule,
                                   width=kWidthButton,
                                   height=kHeightButton * 3)
-    text_new_rules.pack()
+    text_new_rules.pack(**kParamTextPack)
 
     tkinter.Button(window_remove_rule,
                    text='remove',
                    height=kHeightButton,
                    width=kWidthButton,
-                   command=remove_rule_impl).pack()
+                   command=remove_rule_impl).pack(**kParamButtonPack)
 
 
 base_window = tkinter.Tk()
@@ -199,13 +209,13 @@ text_this_day = tkinter.Text(frame_this_day,
                              state=tkinter.DISABLED)
 text_this_day.bind('<1>', lambda event: text_this_day.focus_set())
 update_text_this_day()
-text_this_day.pack()
+text_this_day.pack(**kParamTextPack)
 
 tkinter.Button(frame_this_day,
                text='refresh',
                height=kHeightButton,
                width=kWidthButton,
-               command=update_text_this_day).pack()
+               command=update_text_this_day).pack(**kParamButtonPack)
 
 # for tab next day
 text_next_day = tkinter.Text(frame_next_day,
@@ -214,13 +224,13 @@ text_next_day = tkinter.Text(frame_next_day,
                              state=tkinter.DISABLED)
 text_next_day.bind('<1>', lambda event: text_next_day.focus_set())
 update_next_next_day()
-text_next_day.pack()
+text_next_day.pack(**kParamTextPack)
 
 tkinter.Button(frame_next_day,
                text='refresh',
                height=kHeightButton,
                width=kWidthButton,
-               command=update_next_next_day).pack()
+               command=update_next_next_day).pack(**kParamButtonPack)
 
 # for tab this week
 text_this_week = tkinter.Text(frame_this_week,
@@ -229,13 +239,13 @@ text_this_week = tkinter.Text(frame_this_week,
                               state=tkinter.DISABLED)
 text_this_week.bind('<1>', lambda event: text_this_week.focus_set())
 update_text_this_week()
-text_this_week.pack()
+text_this_week.pack(**kParamTextPack)
 
 tkinter.Button(frame_this_week,
                text='refresh',
                height=kHeightButton,
                width=kWidthButton,
-               command=update_text_this_week).pack()
+               command=update_text_this_week).pack(**kParamButtonPack)
 
 # for tab next week
 text_next_week = tkinter.Text(frame_next_week,
@@ -244,13 +254,13 @@ text_next_week = tkinter.Text(frame_next_week,
                               state=tkinter.DISABLED)
 text_next_week.bind('<1>', lambda event: text_next_week.focus_set())
 update_next_next_week()
-text_next_week.pack()
+text_next_week.pack(**kParamTextPack)
 
 tkinter.Button(frame_next_week,
                text='refresh',
                height=kHeightButton,
                width=kWidthButton,
-               command=update_next_next_week).pack()
+               command=update_next_next_week).pack(**kParamButtonPack)
 
 # for tab handle rule
 text_rules = tkinter.Text(frame_handle_rule,
@@ -259,36 +269,36 @@ text_rules = tkinter.Text(frame_handle_rule,
                           state=tkinter.DISABLED)
 text_rules.bind('<1>', lambda event: text_rules.focus_set())
 display_rules()
-text_rules.pack()
+text_rules.pack(**kParamTextPack)
 
 tkinter.Button(frame_handle_rule,
                text='add',
                height=kHeightButton,
                width=kWidthButton,
-               command=add_rule).pack()
+               command=add_rule).pack(**kParamButtonPack)
 tkinter.Button(frame_handle_rule,
                text='remove',
                height=kHeightButton,
                width=kWidthButton,
-               command=remove_rule).pack()
+               command=remove_rule).pack(**kParamButtonPack)
 
 # for tab handle todo
 text_todo_date = tkinter.Text(frame_handle_todo, height=3, width=kWidthButton)
 text_todo_content = tkinter.Text(frame_handle_todo,
                                  height=kHeightButton * 3,
                                  width=kWidthButton)
-text_todo_date.pack()
-text_todo_content.pack()
+text_todo_date.pack(**kParamTextPack)
+text_todo_content.pack(**kParamTextPack)
 tkinter.Button(frame_handle_todo,
                text='add',
                height=kHeightButton,
                width=kWidthButton,
-               command=add_todo).pack()
+               command=add_todo).pack(**kParamButtonPack)
 tkinter.Button(frame_handle_todo,
                text='remove old',
                height=kHeightButton,
                width=kWidthButton,
-               command=remove_old_todo).pack()
+               command=remove_old_todo).pack(**kParamButtonPack)
 init_todo_addtion()
 
 tab_container.add(frame_this_day, text='this day')
@@ -298,6 +308,6 @@ tab_container.add(frame_next_week, text='next week')
 tab_container.add(frame_handle_rule, text='handle rule')
 tab_container.add(frame_handle_todo, text='handle todo')
 
-tab_container.pack(side=tkinter.RIGHT, fill=tkinter.Y)
+tab_container.pack(**kParamTextPack)
 
 tkinter.mainloop()
