@@ -25,6 +25,22 @@ kParamTextPack = {
     'fill': tkinter.BOTH,
     'side': tkinter.TOP
 }
+kParamPackLeft = {
+    'expand': tkinter.YES,
+    'fill': tkinter.BOTH,
+    'side': tkinter.LEFT
+}
+
+
+def get_next_day() -> datetime.datetime:
+    time = datetime.datetime.now() + kOneDay
+    while time.isocalendar()[2] > (6 if kIsSaturdayWorkday else 5):
+        time += kOneDay
+    return time
+
+
+def format_date(time: datetime.datetime) -> str:
+    return str(time)[:10]
 
 
 def update_text_this_day():
@@ -36,12 +52,9 @@ def update_text_this_day():
 
 
 def update_next_next_day():
-    time = datetime.datetime.now() + kOneDay
-    while time.isocalendar()[2] > (6 if kIsSaturdayWorkday else 5):
-        time += kOneDay
     text_next_day.config(state='normal')
     text_next_day.delete('1.0', tkinter.END)
-    text_next_day.insert(tkinter.END, utils.summarize_day(time))
+    text_next_day.insert(tkinter.END, utils.summarize_day(get_next_day()))
     text_next_day.config(state='disabled')
 
 
@@ -73,7 +86,7 @@ def update_reminders():
 def init_todo_addtion():
     text_todo_date.delete('1.0', tkinter.END)
     text_todo_content.delete('1.0', tkinter.END)
-    text_todo_date.insert(tkinter.END, str(datetime.datetime.now())[:10])
+    text_todo_date.insert(tkinter.END, format_date(datetime.datetime.now()))
 
 
 def add_todo():
@@ -116,9 +129,8 @@ def clean_rule_text(text: str) -> list:
     elem_rules = tuple(line.strip().split(',') for line in text.split('\n')
                        if bool(line.strip()))
     assert all(len(elems) >= 3 for elems in elem_rules), 'not enough elements'
-    rules = tuple(
-        (elems[0].strip(), elems[1].strip(), ','.join(elems[2:]).strip())
-        for elems in elem_rules)
+    rules = tuple((elems[0].strip(), elems[1].strip(),
+                   ','.join(elems[2:]).strip()) for elems in elem_rules)
     assert all(elems[0] in ('month', 'month-day', 'week', 'week-day') for elems in rules), \
         f'invalid first element, must be one of month, month-day, week, week-day'
     assert all(elems[1] in ('even', 'odd') or elems[1].isdigit() for elems in rules), \
@@ -140,22 +152,23 @@ def add_rule():
     explanation = ('add rules in text field, each line for one rule:', '',
                    'month, even, rule for even months',
                    'week-day, 1, rule for monday')
-    tkinter.Label(window_add,
-                  text='\n'.join(explanation),
-                  width=kWidthButton,
-                  height=kHeightButton,
-                  justify=tkinter.LEFT).pack()
+    tkinter.Label(
+        window_add,
+        text='\n'.join(explanation),
+        width=kWidthButton,
+        height=kHeightButton,
+        justify=tkinter.LEFT).pack()
 
-    text_new_rules = tkinter.Text(window_add,
-                                  width=kWidthButton,
-                                  height=kHeightButton * 3)
+    text_new_rules = tkinter.Text(
+        window_add, width=kWidthButton, height=kHeightButton * 3)
     text_new_rules.pack(**kParamTextPack)
 
-    tkinter.Button(window_add,
-                   text='add',
-                   height=kHeightButton,
-                   width=kWidthButton,
-                   command=add_rule_impl).pack(**kParamButtonPack)
+    tkinter.Button(
+        window_add,
+        text='add',
+        height=kHeightButton,
+        width=kWidthButton,
+        command=add_rule_impl).pack(**kParamButtonPack)
 
 
 def remove_rule():
@@ -173,22 +186,35 @@ def remove_rule():
                    '(action will take place when all at exact matches)',
                    'month, even, rule for even months',
                    'week-day, 1, rule for monday')
-    tkinter.Label(window_remove_rule,
-                  text='\n'.join(explanation),
-                  width=kWidthButton,
-                  height=kHeightButton,
-                  justify=tkinter.LEFT).pack()
+    tkinter.Label(
+        window_remove_rule,
+        text='\n'.join(explanation),
+        width=kWidthButton,
+        height=kHeightButton,
+        justify=tkinter.LEFT).pack()
 
-    text_new_rules = tkinter.Text(window_remove_rule,
-                                  width=kWidthButton,
-                                  height=kHeightButton * 3)
+    text_new_rules = tkinter.Text(
+        window_remove_rule, width=kWidthButton, height=kHeightButton * 3)
     text_new_rules.pack(**kParamTextPack)
 
-    tkinter.Button(window_remove_rule,
-                   text='remove',
-                   height=kHeightButton,
-                   width=kWidthButton,
-                   command=remove_rule_impl).pack(**kParamButtonPack)
+    tkinter.Button(
+        window_remove_rule,
+        text='remove',
+        height=kHeightButton,
+        width=kWidthButton,
+        command=remove_rule_impl).pack(**kParamButtonPack)
+
+
+def set_todo_date_next_day():
+    text_todo_date.delete('1.0', tkinter.END)
+    text_todo_date.insert(tkinter.END, format_date(get_next_day()))
+
+
+def set_todo_date_next_week():
+    text_todo_date.delete('1.0', tkinter.END)
+    text_todo_date.insert(
+        tkinter.END,
+        format_date(datetime.datetime.now() + datetime.timedelta(days=7)))
 
 
 base_window = tkinter.Tk()
@@ -203,102 +229,129 @@ frame_handle_rule = tkinter.Frame(tab_container)
 frame_handle_todo = tkinter.Frame(tab_container)
 
 # for tab this day
-text_this_day = tkinter.Text(frame_this_day,
-                             width=kWidthButton,
-                             height=kHeightButton * 5,
-                             state=tkinter.DISABLED)
+text_this_day = tkinter.Text(
+    frame_this_day,
+    width=kWidthButton,
+    height=kHeightButton * 5,
+    state=tkinter.DISABLED)
 text_this_day.bind('<1>', lambda event: text_this_day.focus_set())
 update_text_this_day()
 text_this_day.pack(**kParamTextPack)
 
-tkinter.Button(frame_this_day,
-               text='refresh',
-               height=kHeightButton,
-               width=kWidthButton,
-               command=update_text_this_day).pack(**kParamButtonPack)
+tkinter.Button(
+    frame_this_day,
+    text='refresh',
+    height=kHeightButton,
+    width=kWidthButton,
+    command=update_text_this_day).pack(**kParamButtonPack)
 
 # for tab next day
-text_next_day = tkinter.Text(frame_next_day,
-                             width=kWidthButton,
-                             height=kHeightButton * 5,
-                             state=tkinter.DISABLED)
+text_next_day = tkinter.Text(
+    frame_next_day,
+    width=kWidthButton,
+    height=kHeightButton * 5,
+    state=tkinter.DISABLED)
 text_next_day.bind('<1>', lambda event: text_next_day.focus_set())
 update_next_next_day()
 text_next_day.pack(**kParamTextPack)
 
-tkinter.Button(frame_next_day,
-               text='refresh',
-               height=kHeightButton,
-               width=kWidthButton,
-               command=update_next_next_day).pack(**kParamButtonPack)
+tkinter.Button(
+    frame_next_day,
+    text='refresh',
+    height=kHeightButton,
+    width=kWidthButton,
+    command=update_next_next_day).pack(**kParamButtonPack)
 
 # for tab this week
-text_this_week = tkinter.Text(frame_this_week,
-                              width=kWidthButton,
-                              height=kHeightButton * 5,
-                              state=tkinter.DISABLED)
+text_this_week = tkinter.Text(
+    frame_this_week,
+    width=kWidthButton,
+    height=kHeightButton * 5,
+    state=tkinter.DISABLED)
 text_this_week.bind('<1>', lambda event: text_this_week.focus_set())
 update_text_this_week()
 text_this_week.pack(**kParamTextPack)
 
-tkinter.Button(frame_this_week,
-               text='refresh',
-               height=kHeightButton,
-               width=kWidthButton,
-               command=update_text_this_week).pack(**kParamButtonPack)
+tkinter.Button(
+    frame_this_week,
+    text='refresh',
+    height=kHeightButton,
+    width=kWidthButton,
+    command=update_text_this_week).pack(**kParamButtonPack)
 
 # for tab next week
-text_next_week = tkinter.Text(frame_next_week,
-                              width=kWidthButton,
-                              height=kHeightButton * 5,
-                              state=tkinter.DISABLED)
+text_next_week = tkinter.Text(
+    frame_next_week,
+    width=kWidthButton,
+    height=kHeightButton * 5,
+    state=tkinter.DISABLED)
 text_next_week.bind('<1>', lambda event: text_next_week.focus_set())
 update_next_next_week()
 text_next_week.pack(**kParamTextPack)
 
-tkinter.Button(frame_next_week,
-               text='refresh',
-               height=kHeightButton,
-               width=kWidthButton,
-               command=update_next_next_week).pack(**kParamButtonPack)
+tkinter.Button(
+    frame_next_week,
+    text='refresh',
+    height=kHeightButton,
+    width=kWidthButton,
+    command=update_next_next_week).pack(**kParamButtonPack)
 
 # for tab handle rule
-text_rules = tkinter.Text(frame_handle_rule,
-                          height=kHeightButton * 3,
-                          width=kWidthButton,
-                          state=tkinter.DISABLED)
+text_rules = tkinter.Text(
+    frame_handle_rule,
+    height=kHeightButton * 3,
+    width=kWidthButton,
+    state=tkinter.DISABLED)
 text_rules.bind('<1>', lambda event: text_rules.focus_set())
 display_rules()
 text_rules.pack(**kParamTextPack)
 
-tkinter.Button(frame_handle_rule,
-               text='add',
-               height=kHeightButton,
-               width=kWidthButton,
-               command=add_rule).pack(**kParamButtonPack)
-tkinter.Button(frame_handle_rule,
-               text='remove',
-               height=kHeightButton,
-               width=kWidthButton,
-               command=remove_rule).pack(**kParamButtonPack)
+tkinter.Button(
+    frame_handle_rule,
+    text='add',
+    height=kHeightButton,
+    width=kWidthButton,
+    command=add_rule).pack(**kParamButtonPack)
+tkinter.Button(
+    frame_handle_rule,
+    text='remove',
+    height=kHeightButton,
+    width=kWidthButton,
+    command=remove_rule).pack(**kParamButtonPack)
 
 # for tab handle todo
-text_todo_date = tkinter.Text(frame_handle_todo, height=3, width=kWidthButton)
-text_todo_content = tkinter.Text(frame_handle_todo,
-                                 height=kHeightButton * 3,
-                                 width=kWidthButton)
-text_todo_date.pack(**kParamTextPack)
+frame_todo_date = tkinter.Frame(frame_handle_todo)
+text_todo_date = tkinter.Text(
+    frame_todo_date, height=3, width=kWidthButton // 4)
+text_todo_date.pack(**kParamPackLeft)
+tkinter.Button(
+    frame_todo_date,
+    height=3,
+    width=kWidthButton // 4,
+    text='next day',
+    command=set_todo_date_next_day).pack(**kParamPackLeft)
+tkinter.Button(
+    frame_todo_date,
+    height=3,
+    width=kWidthButton // 4,
+    text='same day next week',
+    command=set_todo_date_next_week).pack(**kParamPackLeft)
+text_todo_content = tkinter.Text(
+    frame_handle_todo, height=kHeightButton * 3, width=kWidthButton)
+frame_todo_date.pack(**kParamTextPack)
 text_todo_content.pack(**kParamTextPack)
-tkinter.Button(frame_handle_todo,
-               text='add',
-               height=kHeightButton,
-               width=kWidthButton,
-               command=add_todo).pack(**kParamButtonPack)
-tkinter.Button(frame_handle_todo,
-               text='remove old',
-               height=kHeightButton,
-               width=kWidthButton,
-               command=remove_old_todo).pack(**kParamButtonPack)
+tkinter.Button(
+    frame_handle_todo,
+    text='add',
+    height=kHeightButton,
+    width=kWidthButton,
+    command=add_todo).pack(**kParamButtonPack)
+tkinter.Button(
+    frame_handle_todo,
+    text='remove old',
+    height=kHeightButton,
+    width=kWidthButton,
+    command=remove_old_todo).pack(**kParamButtonPack)
 init_todo_addtion()
 
 tab_container.add(frame_this_day, text='this day')
