@@ -227,6 +227,7 @@ frame_this_week = tkinter.Frame(tab_container)
 frame_next_week = tkinter.Frame(tab_container)
 frame_handle_rule = tkinter.Frame(tab_container)
 frame_handle_todo = tkinter.Frame(tab_container)
+frame_calendar = tkinter.Frame(tab_container)
 
 # for tab this day
 text_this_day = tkinter.Text(
@@ -354,12 +355,77 @@ tkinter.Button(
     command=remove_old_todo).pack(**kParamButtonPack)
 init_todo_addtion()
 
+
+# for table calendar
+def prepare_calendar():
+    today = datetime.datetime.now()
+    date = today - datetime.timedelta(days=(
+        today.isocalendar()[2] - 1)) + datetime.timedelta(days=(7 * w_offset))
+    for w in range(n_week):
+        for d in range(7):
+            buttons_cw[w].configure(text=f'CW{date.isocalendar()[1]}')
+            buttons_calendar[w][d].configure(text=f'{date.month}-{date.day}')
+            date += kOneDay
+
+
+def navi_week(row: int):
+    global w_offset
+    w_offset += row - (n_week // 2)
+    prepare_calendar()
+
+
+def disp_date(row: int, col: int):
+    today = datetime.datetime.now()
+    date = today - datetime.timedelta(days=(
+        today.isocalendar()[2] - 1)) + datetime.timedelta(days=(7 * w_offset))
+    date += datetime.timedelta(days=(7 * row + col))
+
+    display = tkinter.Tk()
+    display.title(str(date)[:10])
+    text_display = tkinter.Text(
+        display, width=kWidthButton, height=kHeightButton * 5)
+    text_display.insert(tkinter.END, utils.summarize_day(date))
+
+    text_display.config(state='disabled')
+    text_display.bind('<1>', lambda event: text_next_day.focus_set())
+    text_display.pack(**kParamTextPack)
+
+
+n_week = 9
+w_offset = -(n_week // 2)
+print(n_week, w_offset)
+width_calendar_item = kWidthButton // 11
+height_calendar_item = 2
+buttons_calendar = tuple(
+    tuple(
+        tkinter.Button(
+            frame_calendar,
+            height=height_calendar_item,
+            width=width_calendar_item,
+            command=lambda x=r, y=c: disp_date(x, y)) for c in range(7))
+    for r in range(n_week))
+buttons_cw = tuple(
+    tkinter.Button(
+        frame_calendar,
+        height=height_calendar_item,
+        width=width_calendar_item,
+        command=lambda x=r: navi_week(x)) for r in range(n_week))
+for w in range(n_week):
+    for d in range(7):
+        buttons_cw[w].grid(column=0, row=(w + 1))
+        buttons_cw[w].configure(text=f'CW{w}')
+        buttons_calendar[w][d].grid(column=(d + 1), row=(w + 1))
+        buttons_calendar[w][d].configure(text=f'{w}-{d}')
+
+prepare_calendar()
+
 tab_container.add(frame_this_day, text='this day')
 tab_container.add(frame_next_day, text='next day')
 tab_container.add(frame_this_week, text='this week')
 tab_container.add(frame_next_week, text='next week')
 tab_container.add(frame_handle_rule, text='handle rule')
 tab_container.add(frame_handle_todo, text='handle todo')
+tab_container.add(frame_calendar, text='calendar')
 
 tab_container.pack(**kParamTextPack)
 
