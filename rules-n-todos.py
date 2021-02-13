@@ -357,7 +357,7 @@ init_todo_addtion()
 
 
 # for table calendar
-def prepare_calendar():
+def update_calendar():
     today = datetime.datetime.now()
     date = today - datetime.timedelta(days=(
         today.isocalendar()[2] - 1)) + datetime.timedelta(days=(7 * w_offset))
@@ -365,13 +365,18 @@ def prepare_calendar():
         for d in range(7):
             buttons_cw[w].configure(text=f'CW{date.isocalendar()[1]}')
             buttons_calendar[w][d].configure(text=f'{date.month}-{date.day}')
+            is_today = today.year == date.year and today.month == date.month and today.day == date.day
+            buttons_calendar[w][d].configure(
+                bg='grey' if is_today else 'white')
+            buttons_calendar[w][d].configure(
+                fg='white' if is_today else 'black')
             date += kOneDay
 
 
 def navi_week(row: int):
     global w_offset
     w_offset += row - (n_week // 2)
-    prepare_calendar()
+    update_calendar()
 
 
 def disp_date(row: int, col: int):
@@ -417,7 +422,7 @@ for w in range(n_week):
         buttons_calendar[w][d].grid(column=(d + 1), row=(w + 1))
         buttons_calendar[w][d].configure(text=f'{w}-{d}')
 
-prepare_calendar()
+update_calendar()
 
 tab_container.add(frame_this_day, text='this day')
 tab_container.add(frame_next_day, text='next day')
