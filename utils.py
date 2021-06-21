@@ -14,16 +14,6 @@ def unify_int(text: str) -> str:
     return text
 
 
-if __name__ == '__main__':
-    assert unify_int('1') == '1'
-    assert unify_int('01') == '1'
-    assert unify_int('001') == '1'
-    assert unify_int('10') == '10'
-    assert unify_int('day-1') == 'day-1'
-    assert unify_int('day') == 'day'
-    assert unify_int('') == ''
-
-
 def find(data: dict, keys: list) -> list:
     if not bool(keys):
         return data
@@ -33,17 +23,6 @@ def find(data: dict, keys: list) -> list:
         if unify_int(key) == keys[0]:
             return find(data[key], keys[1:])
     return None
-
-
-if __name__ == '__main__':
-    assert find('1', []) == '1'
-    assert find({'1': 3}, []) == {'1': 3}
-    assert find({'1': 3}, ['1']) == 3
-    assert find({'01': 3}, ['1']) == 3
-    assert find({'001': 3}, ['1']) == 3
-    assert find({'1': 3}, ['2']) is None
-    assert find({'1': {'2': 3}}, ['1', '2']) == 3
-    assert find({'1': {'2': 3}}, ['1', '1']) is None
 
 
 def format_list(items: list) -> str:
@@ -142,17 +121,6 @@ def is_date_format_correct(text: str) -> bool:
     except:
         return False
     return True
-
-
-if __name__ == '__main__':
-    assert not is_date_format_correct('')
-    assert not is_date_format_correct('abcd')
-    assert not is_date_format_correct('1234')
-    assert not is_date_format_correct('12345678')
-    assert not is_date_format_correct('1234/56/78')
-    assert not is_date_format_correct('12.34.5678')
-    assert not is_date_format_correct('1234-56-78')
-    assert is_date_format_correct('1992-01-15')
 
 
 def remove_old_todo():
