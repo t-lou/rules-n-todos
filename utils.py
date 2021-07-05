@@ -30,6 +30,19 @@ def format_list(items: list) -> str:
                      for i, it in enumerate(items, 1)) + '\n'
 
 
+class TodoHandler(object):
+    def __init__(self):
+        self._todos = json.loads(open(kFilenameTodo).read()) if os.path.isfile(
+            kFilenameTodo) else dict()
+
+    def get_on_day(self, target_time: datetime.datetime) -> list:
+        keys = [
+            str(i)
+            for i in (target_time.year, target_time.month, target_time.day)
+        ]
+        return find(self._todos, keys)
+
+
 def summarize_rules(time_attributes: dict) -> str:
     text = ''
 
@@ -68,18 +81,11 @@ def summarize_day(target_time: datetime.datetime) -> str:
     }
     text += summarize_rules(time_attributes)
 
-    # if file for todos is available, fine matches and print
-    if os.path.isfile(kFilenameTodo):
-        todos = json.loads(open(kFilenameTodo).read())
-        todo = find(
-            todos,
-            tuple(
-                str(time_attributes[k])
-                for k in ('year', 'month', 'month-day')))
-        assert todo is None or type(todo) in (
-            tuple, list), f'saved todo {todo} is not a list'
-        if todo is not None:
-            text += 'Todo is\n' + format_list(todo) + '\n'
+    todo = TodoHandler().get_on_day(target_time)
+    assert todo is None or type(todo) in (
+        tuple, list), f'saved todo {todo} is not a list'
+    if todo is not None:
+        text += 'Todo is\n' + format_list(todo) + '\n'
     return text
 
 

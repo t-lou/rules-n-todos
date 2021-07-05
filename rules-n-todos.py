@@ -344,13 +344,16 @@ init_todo_addtion()
 
 # for table calendar
 def update_calendar():
+    todo_handler = utils.TodoHandler()
     today = datetime.datetime.now()
     date = today - datetime.timedelta(days=(
         today.isocalendar()[2] - 1)) + datetime.timedelta(days=(7 * w_offset))
     for w in range(n_week):
         for d in range(7):
+            text = f'{date.month}-{date.day}' + ('!' if bool(
+                todo_handler.get_on_day(date)) else ' ')
             buttons_cw[w].configure(text=f'CW{date.isocalendar()[1]}')
-            buttons_calendar[w][d].configure(text=f'{date.month}-{date.day}')
+            buttons_calendar[w][d].configure(text=text)
             is_today = today.year == date.year and today.month == date.month and today.day == date.day
             buttons_calendar[w][d].configure(
                 bg='grey' if is_today else 'white')
