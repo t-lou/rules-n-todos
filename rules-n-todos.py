@@ -227,6 +227,7 @@ frame_next_week = tkinter.Frame(tab_container)
 frame_handle_rule = tkinter.Frame(tab_container)
 frame_handle_todo = tkinter.Frame(tab_container)
 frame_calendar = tkinter.Frame(tab_container)
+frame_progress = tkinter.Frame(tab_container)
 
 # for tab this day
 text_this_day = tkinter.Text(frame_this_day,
@@ -411,6 +412,10 @@ for w in range(n_week):
 
 update_calendar()
 
+# for progress
+def add_progress(name: str, date_start: datetime.datetime, date_end: datetime.datetime):
+    pass
+
 tab_container.add(frame_this_day, text='this day')
 tab_container.add(frame_next_day, text='next day')
 tab_container.add(frame_this_week, text='this week')
@@ -418,6 +423,7 @@ tab_container.add(frame_next_week, text='next week')
 tab_container.add(frame_handle_rule, text='handle rule')
 tab_container.add(frame_handle_todo, text='handle todo')
 tab_container.add(frame_calendar, text='calendar')
+tab_container.add(frame_progress, text='progress')
 
 tab_container.pack(**kParamTextPack)
 

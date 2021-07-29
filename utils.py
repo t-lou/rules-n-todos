@@ -198,3 +198,85 @@ def remove_rules(rules: list):
             if content != rule[2]
         ]
     open(kFilenameRule, 'w').write(json.dumps(defined_rules, indent=' '))
+
+
+class ProgressHandler(object):
+    def __init__(self):
+        self._path = '.progress.json'
+        self._date_format = '%Y-%m-%d'
+        self._progresses = self.load_progress()
+
+    def get_names(self) -> tuple:
+        return tuple(self._progresses.keys())
+
+    def get_details(self, name: str) -> dict:
+        return self._progresses[name] if name in self._progresses else None
+
+    def load_progress(self) -> dict:
+        progresses = json.loads(open(self._path).read()) if os.path.isfile(
+            self._path) else {}
+        return {
+            name: {
+                'start':
+                datetime.datetime.strptime(progresses[name]['start'],
+                                           self._date_format),
+                'end':
+                datetime.datetime.strptime(progresses[name]['end'],
+                                           self._date_format),
+                'progress':
+                progresses[name]['progress'],
+            }
+            for name in progresses
+        }
+
+    def _get_date(self, date_start: datetime.datetime) -> datetime.datetime:
+        return datetime.datetime(year=date_start.year,
+                                 month=date_start.month,
+                                 day=date_start.day)
+
+    def add_progress(self,
+                     name: str,
+                     date_start: datetime.datetime,
+                     date_end: datetime.datetime,
+                     progress: int = -1):
+        date_end = self._get_date(date_end)
+        date_start = self._get_date(date_start)
+        assert date_end >= date_start, 'end before start'
+        self._progresses[name] = {
+            'start': date_start,
+            'end': date_end,
+            'progress': progress,
+        }
+
+    def get_progress(self, name: str, date: datetime.datetime = None) -> int:
+        if name not in self._progresses:
+            return None
+        detail = self._progresses[name]
+        if detail['progress'] >= 0:
+            return detail['progress']
+        date = self._get_date(
+            date if date is not None else datetime.datetime.now())
+        return max(
+            0,
+            min(
+                100,
+                int(100.0 * (date - detail['start']).days /
+                    (detail['end'] - detail['start']).days)))
+
+    def save_progress(self):
+        open(self._path, 'w').write(
+            json.dumps(
+                {
+                    name: {
+                        'start':
+                        self._progresses[name]['start'].strftime(
+                            self._date_format),
+                        'end':
+                        self._progresses[name]['end'].strftime(
+                            self._date_format),
+                        'progress':
+                        self._progresses[name]['progress'],
+                    }
+                    for name in self._progresses
+                },
+                indent=' '))
